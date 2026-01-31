@@ -62,8 +62,8 @@ exports.getByCategory = async (req, res) => {
       where,
       attributes: [
         "categoryId",
-        [fn("SUM", col("amount")), "total"],
-        [fn("COUNT", col("id")), "count"],
+        [fn("SUM", col("Transaction.amount")), "total"], // ← MUDANÇA AQUI
+        [fn("COUNT", col("Transaction.id")), "count"], // ← MUDANÇA AQUI
       ],
       include: [
         {
@@ -71,8 +71,13 @@ exports.getByCategory = async (req, res) => {
           attributes: ["name", "color"],
         },
       ],
-      group: ["categoryId", "Category.id", "Category.name", "Category.color"],
-      order: [[fn("SUM", col("amount")), "DESC"]],
+      group: [
+        "Transaction.categoryId",
+        "Category.id",
+        "Category.name",
+        "Category.color",
+      ], // ← MUDANÇA AQUI
+      order: [[fn("SUM", col("Transaction.amount")), "DESC"]], // ← MUDANÇA AQUI
       raw: false,
     });
 
@@ -114,6 +119,7 @@ exports.getMonthly = async (req, res) => {
 
     const monthlyData = {};
 
+    // Inicializa todos os 12 meses
     for (let i = 1; i <= 12; i++) {
       const monthKey = `${currentYear}-${String(i).padStart(2, "0")}`;
       monthlyData[monthKey] = {
@@ -124,8 +130,12 @@ exports.getMonthly = async (req, res) => {
       };
     }
 
+    // Preenche com dados reais
     transactions.forEach((t) => {
-      const monthKey = t.month.substring(0, 7);
+      // Converte Date para string YYYY-MM
+      const monthDate = new Date(t.month);
+      const monthKey = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, "0")}`;
+
       if (monthlyData[monthKey]) {
         if (t.type === "income") {
           monthlyData[monthKey].income = parseFloat(t.total);
@@ -135,6 +145,7 @@ exports.getMonthly = async (req, res) => {
       }
     });
 
+    // Calcula balance
     Object.values(monthlyData).forEach((month) => {
       month.balance = month.income - month.expense;
     });

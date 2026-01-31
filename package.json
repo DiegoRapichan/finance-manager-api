@@ -23,5 +23,13 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DiegoRapichan/finance-manager-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DiegoRapichan/finance-manager-api/issues"
+  },
+  "homepage": "https://github.com/DiegoRapichan/finance-manager-api#readme"
 }
